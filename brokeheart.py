@@ -1,13 +1,14 @@
 from enum import Enum
 import random
 from collections import defaultdict
+import BrokeHeartAgent
 
 
 class Colored(Enum):
-    SPADE = "spade"
-    HEART = "heart"
-    DIAMOND = "diamond"
-    CLUB = "club"
+    SPADE = "♠"
+    HEART = "♥"
+    DIAMOND = "♦"
+    CLUB = "♣"
     
 #each player has 13 cards
 card_order =  [1,13,12,11,10,9,8,7,6,5,4,3,2]
@@ -21,9 +22,9 @@ class Card(object):
         self.number = number
         
     def __str__(self):
-        return str(self.color)+" "+str(self.number)
+        return self.color.value+str(self.number)
     def __repr__(self):
-        return self.color.value+" "+str(self.number)
+        return self.color.value+str(self.number)
     
     def __eq__(self,Other):
         
@@ -93,20 +94,23 @@ class Game(object):
 
     def __init__(self):
         self.set_game()
+
+        
     def set_game(self):
         Poker = [Card(color,num) for num in  card_order for color in card_color]
         random.shuffle(Poker)
-
-        print("Start Order Cards")
         self.Hand = [player(Poker[:13]),player(Poker[13:26]),player(Poker[26:39]),player(Poker[39:])]
+        self.Agents = BrokeHeartAgent.MyAgents
+        self.changecard([self.Agents[i].changecard(self.Hand[i].Cards[:]) for i in range(4)])
         self.turn = 0
+        
         for i in range(3):
             if Card(Colored.CLUB,2) in self.Hand[i].Cards:
                 break
             self.turn+=1
         self.currentType = None
         self.gamehistory = []
-        self.Agents = [easy_agent for i in range(4)]
+        
         self.round = 1
         self.breakheart = False
         self.score = [0 for _ in range(4)]
@@ -124,7 +128,7 @@ class Game(object):
         for position in range(4):
 
             self.compute_legalmoves(idx==1)
-            action = self.Agents[self.turn](self.get_gameknowledge())
+            action = self.Agents[self.turn].playcard(self.get_gameknowledge())
 
 
             if self.islegal(action):
@@ -143,8 +147,8 @@ class Game(object):
 
             self.turn += 1
             self.turn %= 4
-
-
+            
+        print(card_played)
 
         return card_played
 
@@ -174,8 +178,32 @@ class Game(object):
         #
         self.gameknowledge["legalmoves"] =  self.legalmoves[:]
         self.gameknowledge["cards_left"] = self.Hand[self.turn].Cards[:]
+        self.gameknowledge["turn"] = self.turn
         return self.gameknowledge
-
+    
+    def changecard(self,cardslist):
+        for idx,cards in enumerate(cardslist):
+            if len(cards) != 3 or any(c not in self.Hand[idx].Cards for c in cards):
+                cardslist[idx] = random.sample(self.Hand[idx].Cards, 3)
+                
+            if idx != 0:
+                #remove change cards
+                for c in cardslist[idx]:
+                    self.Hand[idx].Cards.remove(c)
+                
+                for c in cardslist[idx-1]:
+                    self.Hand[idx].Cards.append(c)
+                
+        for c in cardslist[0]:
+            self.Hand[0].Cards.remove(c)
+                
+        for c in cardslist[3]:
+            self.Hand[0].Cards.append(c)
+            
+        for i in range(4):
+            self.Hand[i].order()
+    
+    
     def compute_legalmoves(self,first):
         self.legalmoves = []
         hand = self.Hand[self.turn].Cards
@@ -210,10 +238,18 @@ gamehistory
 left cards
 '''
 
-def easy_agent(gameknowledge):
-    return random.choice(gameknowledge["legalmoves"])
+class easy_agent(object):
+    def __init__(self):
+        pass
+    
+    def playcard(self,gameknowledge):
+        return random.choice(gameknowledge["legalmoves"])
+    
+    def changecard(self,cards):
+        return random.sample(cards,3)
 
 
 if __name__=="__main__":
     Onegame = Game()
     result = Onegame.start()
+    print("\n".join(["player %d : %d" %(idx,r) for idx,r in enumerate(result) ]))
