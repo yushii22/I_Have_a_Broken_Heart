@@ -221,9 +221,9 @@ class Game(object):
                 self.legalmoves = [c for c in hand]
         else:
             if self.currentType:
-                self.legalmoves = [c for c in hand if c.color == self.currentType and c.color == Colored.HEART]
+                self.legalmoves = [c for c in hand if c.color == self.currentType and c.color != Colored.HEART]
             else:
-                self.legalmoves = [c for c in hand if c.color == Colored.HEART]
+                self.legalmoves = [c for c in hand if c.color != Colored.HEART]
 
         # if there is nothing to do, play any card you want
         self.legalmoves = self.legalmoves if self.legalmoves else [c for c in hand]

@@ -5,8 +5,8 @@ import random
 
 '''
 class easy_agent(object):
-    def __init__(self):
-        pass
+    def __init__(self,player):
+        self.player = player
     
     def playcard(self,gameknowledge):
         return random.choice(gameknowledge["legalmoves"])
@@ -15,9 +15,9 @@ class easy_agent(object):
         return random.sample(cards,3)
     
 
-def your_agent(object):
-    def __init__(self):
-        pass
+class your_agent(object):
+    def __init__(self,player):
+        self.player = player
     
     '''
     You have to decide which card to play in this round
@@ -45,4 +45,4 @@ def your_agent(object):
 #define your teammates and your agent
 
 #this is an example
-MyAgents = [easy_agent() for i in range(4)]
+MyAgents = [easy_agent(i) for i in range(4)]
