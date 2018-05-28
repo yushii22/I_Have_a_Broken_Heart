@@ -211,7 +211,9 @@ class Game(object):
         # No point Card Can Be played at the first roind
         if first:
             if self.currentType:
-                self.legalmoves = [c for c in hand if c.color == self.currentType and c not in pointcards]
+                self.legalmoves = [c for c in hand if c.color == self.currentType]
+                if not self.legalmoves:
+                    self.legalmoves = [c for c in hand if c not in pointcards]
             else:
                 self.legalmoves = [Card(Colored.CLUB,2)]
         elif self.breakheart:
