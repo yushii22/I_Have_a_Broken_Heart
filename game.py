@@ -54,6 +54,8 @@ class Game:
                 # throw IllegalMoveExceptioin
                 pass
 
+            print("Player #{0} play: {1}.".format(turn, card_played))
+
             if card_played.suit == '♥':
                 self.heart_broken = True
 
@@ -61,8 +63,6 @@ class Game:
             cards_played.append(card_played)
 
             turn = (turn + 1) % 4
-
-            print("Player #{0} play: {1}.".format(turn, card_played))
 
         return cards_played
 
@@ -82,6 +82,8 @@ class Game:
 
             # compute score
             score[turn] += sum(card.point for card in cards_played)
+
+            print(score)
 
         # shooting the moon
         if 26 in score:
@@ -111,7 +113,7 @@ class Game:
             if heart_broken:
                 return cards_you_have
             else:
-                cards = [card for card in cards_you_have if not card.suit != '♥']
+                cards = [card for card in cards_you_have if card.suit != '♥']
                 if cards:
                     return cards
                 else:
