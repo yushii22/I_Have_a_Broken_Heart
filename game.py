@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
 from card import Card
 
 
-GameHistory = namedtuple('GameHistory', ['cards', 'turn'])
+GameInfo = namedtuple('GameInfo', ['rounds', 'scores'])
 
 
 class Game:
@@ -22,7 +23,7 @@ class Game:
         self._pass_card(cards)
 
         self.heart_broken = False
-        self.game_history = []
+        self.game_info = GameInfo([], [0]*4)
         print("Game set")
 
     def _deal_cards(self, cards):
@@ -47,14 +48,14 @@ class Game:
         while len(cards_played) < 4:
             agent, hand = self.agents[turn], self.hands[turn]
 
-            card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, self.game_history)
+            card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, self.game_info)
             legal_moves = Game.get_legal_moves(self.hands[turn], cards_played, self.heart_broken)
 
             if card_played not in legal_moves:
                 # throw IllegalMoveExceptioin
                 pass
 
-            print("Player #{0} play: {1}.".format(turn, card_played))
+            print("Player #{0} play: {1}.".format(turn+1, card_played))
 
             if card_played.suit == '♥':
                 self.heart_broken = True
@@ -67,31 +68,34 @@ class Game:
         return cards_played
 
     def play(self):
-        score = [0] * 4
+        scores = self.game_info.scores
         turn = next(i for i, hand in enumerate(self.hands) if Card('♣', 2) in hand)
         for round in range(1, 14):
             print('Round', round)
-            cards_played = self.play_a_round(turn)
+            cards = self.play_a_round(turn)
+            lead_suit = cards[0].suit
 
-            # save game history
-            self.game_history.append(GameHistory(cards_played, turn))
+            # add Player id to the card
+            cards = [((i+turn) % 4, card) for i, card in enumerate(cards)]
 
-            # set next round
-            win_candidates = [i for i, card in enumerate(cards_played) if card.suit == cards_played[0].suit]
-            turn = (turn + max(win_candidates, key=lambda i: cards_played[i])) % 4
+            # find winner
+            card, turn = max((card, i) for i, card in cards if card.suit == lead_suit)
 
             # compute score
-            score[turn] += sum(card.point for card in cards_played)
+            scores[turn] += sum(card.point for i, card in cards)
 
-            print(score)
+            # save game history
+            self.game_info.rounds.append(cards)
 
-        # shooting the moon
-        if 26 in score:
-            i = score.index(26)
-            score = [26] * 4
-            score[i] = 0
+            print(scores)
 
-        return score
+        # shooting the moon (豬羊變色)
+        if 26 in scores:
+            i = scores.index(26)
+            scores = [26] * 4
+            scores[i] = 0
+
+        return scores
 
     @staticmethod
     def get_legal_moves(cards_you_have, cards_played, heart_broken):
@@ -123,7 +127,7 @@ class Game:
 def main():
     game = Game()
     game.set_game()
-    score = game.play()
+    scores = game.play()
 
 
 if __name__ == '__main__':
