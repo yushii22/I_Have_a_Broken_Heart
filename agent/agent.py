@@ -2,8 +2,8 @@
 
 
 class Agent:
-    def __init__(self):
-        pass
+    def __init__(self, id):
+        self.id = id
 
     def play(self, cards_played, cards_you_have, heart_broken, info):
         pass

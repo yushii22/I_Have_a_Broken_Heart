@@ -12,7 +12,7 @@ class Game:
             self.agents = agents
         else:
             from agent import AgentRandom
-            self.agents = [AgentRandom() for _ in range(4)]
+            self.agents = [AgentRandom(i) for i in range(1, 5)]
 
     def set_game(self, cards=None):
         if cards:
@@ -55,7 +55,7 @@ class Game:
                 # throw IllegalMoveExceptioin
                 pass
 
-            print("Player #{0} play: {1}.".format(turn+1, card_played))
+            print("Player #{0} play: {1}.".format(agent.id, card_played))
 
             if card_played.suit == '♥':
                 self.heart_broken = True
@@ -124,11 +124,7 @@ class Game:
                     return cards_you_have
 
 
-def main():
+if __name__ == '__main__':
     game = Game()
     game.set_game()
     scores = game.play()
-
-
-if __name__ == '__main__':
-    main()
