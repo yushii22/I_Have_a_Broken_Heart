@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from agent import Agent
+from card import ALL_CARDS
 
 
 class MyAgent(Agent):
@@ -8,7 +9,7 @@ class MyAgent(Agent):
     cards_played: cards that has been played this round
     cards_you_have: list of cards in your hand
     heart_broken: heart is broken or not
-    history: cards played in previous rounds
+    info: score information and cards played in previous rounds
     '''
     def play(self, cards_played, cards_you_have, heart_broken, info):
         return ...
