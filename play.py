@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from game import Game
 from agent import AgentRandom
-
+from agent import MediumAgent
 
 if __name__ == '__main__':
     game = Game(
-        [AgentRandom('Iron Man'), AgentRandom('Superman'),
+        [MediumAgent('Iron Man'), AgentRandom('Superman'),
          AgentRandom('Batman'), AgentRandom('Spiderman')]
     )
 
