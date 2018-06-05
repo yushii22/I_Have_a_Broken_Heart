@@ -41,6 +41,7 @@ class Game:
                 # TODO: throw PassCardIllegalException
 
         for i, hand in enumerate(self.hands):
+            print("Player #{0} pass {1} to Player #{2}.".format(i, ", ".join([str(c) for c in cards_to_pass[i]]), (i-1) % 4))
             self.hands[i] = hand - cards_to_pass[i] | cards_to_pass[(i - 1) % 4]
 
     def play_a_round(self, turn):
@@ -87,13 +88,13 @@ class Game:
             # save game history
             self.game_info.rounds.append(cards)
 
-            print(scores)
-
         # shooting the moon (豬羊變色)
         if 26 in scores:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
+
+        print(scores)
 
         return scores
 
