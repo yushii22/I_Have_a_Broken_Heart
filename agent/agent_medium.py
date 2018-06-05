@@ -6,7 +6,7 @@ from card import Card
 import card
 
 
-class MediumAgent(Agent):
+class AgentMedium(Agent):
     def play(self, cards_you_have, cards_played, heart_broken, info):
         #remember cards
         if len(cards_you_have) == 13:
@@ -155,5 +155,3 @@ class MediumAgent(Agent):
         largest_rank = [c for c in cards if self.card_rank[c] == max_card_rank]
 
         return largest_rank
-            
-            

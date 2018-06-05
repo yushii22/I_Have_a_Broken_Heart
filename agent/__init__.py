@@ -1,6 +1,6 @@
 from .agent import Agent
 from .random_agent import AgentRandom
 from .my_agent import MyAgent
-from .medium_agent import MediumAgent
+from .agent_medium import AgentMedium
 
-__all__ = ["Agent", "AgentRandom", "MyAgent","MediumAgent"]
+__all__ = ["Agent", "AgentRandom", "MyAgent", "AgentMedium"]
