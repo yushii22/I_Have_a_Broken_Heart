@@ -88,13 +88,15 @@ class Game:
             # save game history
             self.game_info.rounds.append(cards)
 
+            print(scores)
+
         # shooting the moon (豬羊變色)
         if 26 in scores:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
 
-        print(scores)
+        
 
         return scores
 
