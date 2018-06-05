@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from card import Card
-from exception import *
+from exception import PassCardIllegalException, IllegalMoveExceptioin
 
 
 GameInfo = namedtuple('GameInfo', ['rounds', 'scores'])
@@ -36,9 +36,8 @@ class Game:
 
         # check if legal
         for i, cards in enumerate(cards_to_pass):
-            if  not set(cards).issubset(self.hands[i]):
+            if not set(cards).issubset(self.hands[i]):
                 raise PassCardIllegalException
-                # TODO: throw PassCardIllegalException
 
         for i, hand in enumerate(self.hands):
             print("Player #{0} pass {1} to Player #{2}.".format(i, ", ".join([str(c) for c in cards_to_pass[i]]), (i-1) % 4))
@@ -52,7 +51,7 @@ class Game:
 
             card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, self.game_info)
             legal_moves = Game.get_legal_moves(self.hands[turn], cards_played, self.heart_broken)
-            
+
             if card_played not in legal_moves:
                 raise IllegalMoveExceptioin
 
@@ -95,8 +94,6 @@ class Game:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
-
-        
 
         return scores
 
