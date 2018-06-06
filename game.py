@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from card import Card
+
+from exception import NotHaveCardException
 from exception import PassCardIllegalException, IllegalMoveException
 
 
@@ -36,8 +38,11 @@ class Game:
 
         # check if legal
         for i, cards in enumerate(cards_to_pass):
-            if not set(cards).issubset(self.hands[i]) or len(cards) != 3:
-                raise PassCardIllegalException
+            if not set(cards).issubset(self.hands[i]):
+                cards_not_in = set(cards) - self.hands[i]
+                raise NotHaveCardException(self.agents[i], cards_not_in)
+            if len(cards) != 3:
+                raise PassCardIllegalException(self.agents[i], cards)
 
         for i, hand in enumerate(self.hands):
             card_from = (i - 1) % 4
@@ -57,7 +62,7 @@ class Game:
             legal_moves = Game.get_legal_moves(hand, cards_played, self.heart_broken)
 
             if card_played not in legal_moves:
-                raise IllegalMoveException
+                raise IllegalMoveException(agent, card_played)
 
             print("Player #{0} play: {1}.".format(agent.id, card_played))
 
