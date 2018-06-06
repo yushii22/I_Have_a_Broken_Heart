@@ -97,6 +97,8 @@ class Game:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
+            print('shooting the moon (豬羊變色)')
+            print(scores)
 
         return scores
 
