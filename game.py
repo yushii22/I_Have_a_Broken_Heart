@@ -29,6 +29,81 @@ class Game:
         self.game_info = GameInfo([], [0]*4)
         print("Game set")
 
+    def play(self):
+        scores = self.game_info.scores
+        # find start turn (the one with ♣2)
+        turn = next(i for i, hand in enumerate(self.hands)
+                    if Card('♣', 2) in hand)
+
+        for round in range(1, 14):
+            print('Round', round)
+
+            cards = self.play_a_round(turn)
+            lead = cards[0].suit
+
+            # compute score
+            cards = [((i+turn) % 4, card) for i, card in enumerate(cards)]
+            # find winner
+            _, turn = max((card, i) for i, card in cards if card.suit == lead)
+            scores[turn] += sum(card.point for i, card in cards)
+
+            # save game history
+            self.game_info.rounds.append(cards)
+
+            print(scores)
+
+        # shooting the moon (豬羊變色)
+        if 26 in scores:
+            i = scores.index(26)
+            scores = [26] * 4
+            scores[i] = 0
+            print('Shooting the moon (豬羊變色)')
+            print(scores)
+
+        return scores
+
+    def play_a_round(self, turn):
+        cards_played = []
+
+        while len(cards_played) < 4:
+            card = self._play_card(cards_played, turn)
+            cards_played.append(card)
+            turn = (turn + 1) % 4
+
+        return cards_played
+
+    def customize_info(self, turn):
+        new_info = [[((i-turn) % 4, card) for i, card in round_info]
+                    for round_info in self.game_info.rounds]
+        return GameInfo(new_info, list(self.game_info.scores))
+
+    @staticmethod
+    def get_legal_moves(cards_you_have, cards_played, heart_broken):
+        if Card('♣', 2) in cards_you_have:
+            return [Card('♣', 2)]
+        elif cards_played:
+            suit = cards_played[0].suit
+            # follow suit
+            cards = [card for card in cards_you_have if card.suit == suit]
+            if cards:
+                return cards
+            else:
+                # cannot play point card in the 1st round
+                cards = [card for card in cards_you_have
+                         if card.point == 0 or len(cards_you_have) != 13]
+                if cards:
+                    return cards
+                return cards_you_have
+        else:
+            if heart_broken:
+                return cards_you_have
+            else:
+                cards = [card for card in cards_you_have if card.suit != '♥']
+                if cards:
+                    return cards
+                else:
+                    return cards_you_have
+
     def _deal_cards(self, cards):
         self.hands = [set(cards[i*13:(i+1)*13]) for i in range(4)]
 
@@ -51,94 +126,27 @@ class Game:
                 self.agents[card_from].id, card_str, self.agents[i].id))
             self.hands[i] = hand - cards_to_pass[i] | cards_to_pass[card_from]
 
-    def play_a_round(self, turn):
-        cards_played = []
+    def _play_card(self, cards_played, turn):
+        agent, hand = self.agents[turn], self.hands[turn]
+        hb = self.heart_broken
+        info = self.customize_info(turn)
 
-        while len(cards_played) < 4:
-            agent, hand = self.agents[turn], self.hands[turn]
+        card_played = agent.play(sorted(hand), list(cards_played), hb, info)
 
-            info = self.customize_info(turn)
-            card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, info)
-            legal_moves = Game.get_legal_moves(hand, cards_played, self.heart_broken)
+        # check if the card played is legal
+        if card_played not in Game.get_legal_moves(hand, cards_played, hb):
+            raise IllegalMoveException(agent, card_played)
 
-            if card_played not in legal_moves:
-                raise IllegalMoveException(agent, card_played)
+        # remove the card played from the player's hand
+        hand.remove(card_played)
 
-            print("Player #{0} play: {1}.".format(agent.id, card_played))
+        print("Player #{0} play: {1}.".format(agent.id, card_played))
 
-            if card_played.suit == '♥':
-                self.heart_broken = True
+        if not self.heart_broken and card_played.suit == '♥':
+            self.heart_broken = True
+            print("Heart is broken")
 
-            hand.remove(card_played)
-            cards_played.append(card_played)
-
-            turn = (turn + 1) % 4
-
-        return cards_played
-
-    def play(self):
-        scores = self.game_info.scores
-        # find start turn
-        turn = next(i for i, hand in enumerate(self.hands) if Card('♣', 2) in hand)
-        for round in range(1, 14):
-            print('Round', round)
-            cards = self.play_a_round(turn)
-            lead_suit = cards[0].suit
-
-            # add Player id to the card
-            cards = [((i+turn) % 4, card) for i, card in enumerate(cards)]
-
-            # find winner
-            card, turn = max((card, i) for i, card in cards if card.suit == lead_suit)
-
-            # compute score
-            scores[turn] += sum(card.point for i, card in cards)
-
-            # save game history
-            self.game_info.rounds.append(cards)
-
-            print(scores)
-
-        # shooting the moon (豬羊變色)
-        if 26 in scores:
-            i = scores.index(26)
-            scores = [26] * 4
-            scores[i] = 0
-            print('Shooting the moon (豬羊變色)')
-            print(scores)
-
-        return scores
-
-    def customize_info(self, turn):
-        new_info = [[((i-turn) % 4, card) for i, card in round_info]
-                    for round_info in self.game_info.rounds]
-        return GameInfo(new_info, list(self.game_info.scores))
-
-    @staticmethod
-    def get_legal_moves(cards_you_have, cards_played, heart_broken):
-        if Card('♣', 2) in cards_you_have:
-            return [Card('♣', 2)]
-        elif cards_played:
-            suit = cards_played[0].suit
-            # follow suit
-            cards = [card for card in cards_you_have if card.suit == suit]
-            if cards:
-                return cards
-            else:
-                # cannot play point card in the 1st round
-                cards = [card for card in cards_you_have if card.point == 0 or len(cards_you_have) != 13]
-                if cards:
-                    return cards
-                return cards_you_have
-        else:
-            if heart_broken:
-                return cards_you_have
-            else:
-                cards = [card for card in cards_you_have if card.suit != '♥']
-                if cards:
-                    return cards
-                else:
-                    return cards_you_have
+        return card_played
 
 
 if __name__ == '__main__':
