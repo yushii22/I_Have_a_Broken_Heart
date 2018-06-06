@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from card import Card
-from exception import PassCardIllegalException, IllegalMoveExceptioin
+from exception import PassCardIllegalException, IllegalMoveException
 
 
 GameInfo = namedtuple('GameInfo', ['rounds', 'scores'])
@@ -36,12 +36,15 @@ class Game:
 
         # check if legal
         for i, cards in enumerate(cards_to_pass):
-            if not set(cards).issubset(self.hands[i]):
+            if not set(cards).issubset(self.hands[i]) or len(cards) != 3:
                 raise PassCardIllegalException
 
         for i, hand in enumerate(self.hands):
-            print("Player #{0} pass {1} to Player #{2}.".format(i, ", ".join([str(c) for c in cards_to_pass[i]]), (i-1) % 4))
-            self.hands[i] = hand - cards_to_pass[i] | cards_to_pass[(i - 1) % 4]
+            card_from = (i - 1) % 4
+            card_str = ', '.join(map(str, cards_to_pass[card_from]))
+            print("Player #{0} pass {1} to #{2}.".format(
+                self.agents[card_from].id, card_str, self.agents[i].id))
+            self.hands[i] = hand - cards_to_pass[i] | cards_to_pass[card_from]
 
     def play_a_round(self, turn):
         cards_played = []
@@ -53,7 +56,7 @@ class Game:
             legal_moves = Game.get_legal_moves(self.hands[turn], cards_played, self.heart_broken)
 
             if card_played not in legal_moves:
-                raise IllegalMoveExceptioin
+                raise IllegalMoveException
 
             print("Player #{0} play: {1}.".format(agent.id, card_played))
 
