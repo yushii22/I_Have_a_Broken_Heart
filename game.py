@@ -5,6 +5,8 @@ from card import Card
 from exception import NotHaveCardException
 from exception import PassCardIllegalException, IllegalMoveException
 
+import logging
+
 
 GameInfo = namedtuple('GameInfo', ['rounds', 'scores'])
 
@@ -27,7 +29,7 @@ class Game:
 
         self.heart_broken = False
         self.game_info = GameInfo([], [0]*4)
-        print("Game set")
+        logging.info("Game set")
 
     def play(self):
         scores = self.game_info.scores
@@ -36,7 +38,7 @@ class Game:
                     if Card('♣', 2) in hand)
 
         for round in range(1, 14):
-            print('Round', round)
+            logging.info('Round {}'.format(round))
 
             cards = self.play_a_round(turn)
             lead = cards[0].suit
@@ -50,15 +52,15 @@ class Game:
             # save game history
             self.game_info.rounds.append(cards)
 
-            print(scores)
+            logging.info(scores)
 
         # shooting the moon (豬羊變色)
         if 26 in scores:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
-            print('Shooting the moon (豬羊變色)')
-            print(scores)
+            logging.info('Shooting the moon (豬羊變色)')
+            logging.info(scores)
 
         return scores
 
@@ -122,7 +124,7 @@ class Game:
         for i, hand in enumerate(self.hands):
             card_from = (i - 1) % 4
             card_str = ', '.join(map(str, cards_to_pass[card_from]))
-            print("Player #{0} pass {1} to #{2}.".format(
+            logging.info("Player #{0} pass {1} to #{2}.".format(
                 self.agents[card_from].id, card_str, self.agents[i].id))
             self.hands[i] = hand - cards_to_pass[i] | cards_to_pass[card_from]
 
@@ -140,11 +142,11 @@ class Game:
         # remove the card played from the player's hand
         hand.remove(card_played)
 
-        print("Player #{0} play: {1}.".format(agent.id, card_played))
+        logging.info("Player #{0} play: {1}.".format(agent.id, card_played))
 
         if not self.heart_broken and card_played.suit == '♥':
             self.heart_broken = True
-            print("Heart is broken")
+            logging.info("Heart is broken")
 
         return card_played
 
@@ -153,3 +155,4 @@ if __name__ == '__main__':
     game = Game()
     game.set_game()
     scores = game.play()
+    print(scores)

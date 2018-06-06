@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 from game import Game
-from agent import AgentRandom
-from agent import AgentMedium
+from agent import AgentRandom, AgentMedium, MyAgent
+
+import logging
+
 
 if __name__ == '__main__':
-    game = Game(
-        [AgentMedium('Iron Man'), AgentRandom('Superman'),
-         AgentRandom('Batman'), AgentRandom('Spiderman')]
-    )
+    logging.basicConfig(level=logging.INFO)
 
-    game.set_game()
-    scores = game.play()
+    scores = [0] * 4
+    for _ in range(1000):
+        game = Game(
+            [AgentMedium('Iron Man'), AgentRandom('Superman'),
+             AgentRandom('Batman'), AgentRandom('Spiderman')]
+        )
+
+        game.set_game()
+        for i, score in enumerate(game.play()):
+            scores[i] += score
+
+    print(scores)
