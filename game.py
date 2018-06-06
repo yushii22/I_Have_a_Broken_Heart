@@ -52,8 +52,9 @@ class Game:
         while len(cards_played) < 4:
             agent, hand = self.agents[turn], self.hands[turn]
 
-            card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, self.game_info)
-            legal_moves = Game.get_legal_moves(self.hands[turn], cards_played, self.heart_broken)
+            info = self.customize_info(turn)
+            card_played = agent.play(sorted(hand), list(cards_played), self.heart_broken, info)
+            legal_moves = Game.get_legal_moves(hand, cards_played, self.heart_broken)
 
             if card_played not in legal_moves:
                 raise IllegalMoveException
@@ -72,6 +73,7 @@ class Game:
 
     def play(self):
         scores = self.game_info.scores
+        # find start turn
         turn = next(i for i, hand in enumerate(self.hands) if Card('♣', 2) in hand)
         for round in range(1, 14):
             print('Round', round)
@@ -97,10 +99,15 @@ class Game:
             i = scores.index(26)
             scores = [26] * 4
             scores[i] = 0
-            print('shooting the moon (豬羊變色)')
+            print('Shooting the moon (豬羊變色)')
             print(scores)
 
         return scores
+
+    def customize_info(self, turn):
+        new_info = [[((i-turn) % 4, card) for i, card in round_info]
+                    for round_info in self.game_info.rounds]
+        return GameInfo(new_info, list(self.game_info.scores))
 
     @staticmethod
     def get_legal_moves(cards_you_have, cards_played, heart_broken):
